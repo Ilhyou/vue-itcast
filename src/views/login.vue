@@ -4,13 +4,21 @@
       <img src="../assets/avatar.jpg" alt class="avatar">
       <el-form :model="loginForm" :rules="rules" ref="loginForm" class="demo-ruleForm">
         <el-form-item prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
+          <el-input
+            v-model="loginForm.username"
+            placeholder="请输入用户名"
+            prefix-icon="myicon myicon-user"
+          ></el-input>
         </el-form-item>
         <el-form-item prop="password">
-          <el-input v-model="loginForm.password" placeholder="请输入密码"></el-input>
+          <el-input
+            v-model="loginForm.password"
+            placeholder="请输入密码"
+            prefix-icon="myicon myicon-key"
+          ></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="login-btn">登陆</el-button>
+          <el-button type="primary" class="login-btn" @click="login">登陆</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -31,10 +39,25 @@ export default {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' }
         ],
-        password: [
-          { required: true, message: '请输入密码', trigger: 'blur' }
-        ]
+        password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
       }
+    }
+  },
+  methods: {
+    // 登录
+    login () {
+      // 实现用户的登录验证 之前的rules只是一个单纯的提示信息而已 并不会真正的阻止用户的登录请求
+      // 登录验证的时候 表单有一个validate函数这个函数可以真正的实现表单元素的数据验证，这个验证与之前的、rules规则对应，当验证完成之后，会返回一个值给回调函数，如果是true,说明验证难过，否则就不通过
+      this.$refs.loginForm.validate(valid => {
+        if (valid) {
+          //   验证通过，就去发起登陆请求
+          console.log('ok')
+        } else {
+          // 给出用户提示
+          console.log('no')
+          return false
+        }
+      })
     }
   }
 }
