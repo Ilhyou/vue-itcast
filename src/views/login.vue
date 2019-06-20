@@ -35,8 +35,8 @@ export default {
   data () {
     return {
       loginForm: {
-        username: '',
-        password: ''
+        username: 'admin',
+        password: '123456'
       },
       //   添加验证规则
       rules: {
@@ -65,6 +65,7 @@ export default {
                 })
               } else {
                 // 路由跳转
+                this.$router.push({ name: 'Home' })
               }
             })
             .catch(err => {
