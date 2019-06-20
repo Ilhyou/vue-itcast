@@ -26,6 +26,10 @@
 </template>
 
 <script>
+// 在组件外卖呢进行成员的引入
+// import 是用来引入模块中的成员
+// require 是用来引入模块
+import { userLogin } from '@/api/users.js'
 export default {
   // 定义数据
   data () {
@@ -51,9 +55,26 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           //   验证通过，就去发起登陆请求
-          console.log('ok')
+          userLogin(this.loginForm)
+            .then(res => {
+              console.log(res)
+              if (res.data.meta.status === 400) {
+                this.$message({
+                  message: res.data.meta.msg,
+                  type: 'error'
+                })
+              } else {
+                // 路由跳转
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.$message({
+                message: '服务器异常,请重试',
+                type: 'error'
+              })
+            })
         } else {
-          // 给出用户提示
           // 给出用户提示
           this.$message({
             message: '数据输入不合法',
