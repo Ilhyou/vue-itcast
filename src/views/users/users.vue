@@ -19,12 +19,12 @@
       <el-button type="success" plain>添加用户</el-button>
     </div>
     <!-- 表格 -->
-    <el-table :data="tableData" border style="width: 100%;margin-top:15px">
+    <el-table :data="usersList" border style="width: 100%;margin-top:15px">
       <el-table-column type="index" width="50"></el-table-column>
-      <el-table-column prop="date" label="日期" width="180"></el-table-column>
-      <el-table-column prop="name" label="姓名" width="180"></el-table-column>
-      <el-table-column prop="address" label="地址"></el-table-column>
-      <el-table-column label="状态"  width="120">
+      <el-table-column prop="username" label="姓名" width="180"></el-table-column>
+      <el-table-column prop="email" label="邮箱" width="180"></el-table-column>
+      <el-table-column prop="mobile" label="电话" width="300"></el-table-column>
+      <el-table-column label="状态" width="120">
         <template slot-scope="scope">
           <el-switch v-model="value2" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
         </template>
@@ -59,28 +59,7 @@ export default {
       // 每页显示条数
       pagesize: 2,
       // 表格数据
-      tableData: [
-        {
-          date: '2016-05-02',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        },
-        {
-          date: '2016-05-04',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1517 弄'
-        },
-        {
-          date: '2016-05-01',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1519 弄'
-        },
-        {
-          date: '2016-05-03',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1516 弄'
-        }
-      ],
+      usersList: [],
       // 状态
       value2: ''
     }
@@ -94,9 +73,22 @@ export default {
     })
       .then(res => {
         console.log(res)
+        if (res.data.meta.status === 400) {
+          this.$message({
+            message: res.data.meta.msg,
+            type: 'error'
+          })
+        } else {
+          // 动态渲染
+          this.usersList = res.data.data.users
+        }
       })
       .catch(err => {
         console.log(err)
+        this.$message({
+          message: '服务器异常,请重试',
+          type: 'error'
+        })
       })
   },
   methods: {
