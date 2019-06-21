@@ -24,6 +24,24 @@
       <el-table-column prop="date" label="日期" width="180"></el-table-column>
       <el-table-column prop="name" label="姓名" width="180"></el-table-column>
       <el-table-column prop="address" label="地址"></el-table-column>
+      <el-table-column label="状态"  width="120">
+        <template slot-scope="scope">
+          <el-switch v-model="value2" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="操作">
+        <template slot-scope="scope">
+          <el-tooltip class="item" effect="dark" content="编辑" placement="top">
+            <el-button type="primary" icon="el-icon-edit"></el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
+            <el-button type="success" icon="el-icon-share"></el-button>
+          </el-tooltip>
+          <el-tooltip class="item" effect="dark" content="删除" placement="top">
+            <el-button type="warning" icon="el-icon-delete"></el-button>
+          </el-tooltip>
+        </template>
+      </el-table-column>
     </el-table>
   </div>
 </template>
@@ -62,7 +80,9 @@ export default {
           name: '王小虎',
           address: '上海市普陀区金沙江路 1516 弄'
         }
-      ]
+      ],
+      // 状态
+      value2: ''
     }
   },
   // 页面加载完成就去获取用户列表数据
@@ -78,6 +98,14 @@ export default {
       .catch(err => {
         console.log(err)
       })
+  },
+  methods: {
+    handleEdit (index, row) {
+      console.log(index, row)
+    },
+    handleDelete (index, row) {
+      console.log(index, row)
+    }
   }
 }
 </script>
