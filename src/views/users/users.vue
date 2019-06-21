@@ -28,7 +28,7 @@
   </div>
 </template>
 <script>
-import { getAllList } from '@/api/users.js';
+import { getAllList } from '@/api/users.js'
 export default {
   data () {
     return {
@@ -37,9 +37,9 @@ export default {
       // 查询参数
       query: '',
       // 当前页码
-      pagenum: '',
+      pagenum: 1,
       // 每页显示条数
-      pagesize: '',
+      pagesize: 2,
       // 表格数据
       tableData: [
         {

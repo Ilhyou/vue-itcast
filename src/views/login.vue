@@ -29,7 +29,7 @@
 // 在组件外卖呢进行成员的引入
 // import 是用来引入模块中的成员
 // require 是用来引入模块
-import { userLogin } from '@/api/users.js'
+import { userLogin } from '@/api/users.js';
 export default {
   // 定义数据
   data () {
@@ -64,6 +64,8 @@ export default {
                   type: 'error'
                 })
               } else {
+                // 存储本地token
+                localStorage.setItem('itcast_manager', res.data.data.token)
                 // 路由跳转
                 this.$router.push({ name: 'Home' })
               }
