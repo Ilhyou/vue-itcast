@@ -12,6 +12,13 @@ Vue.use(VueRouter)
 var router = new VueRouter({
   routes: [
     {
+      path: '/',
+      // 实现重定向
+      redirect: {
+        name: 'Login'
+      }
+    },
+    {
       name: 'Login',
       path: '/login',
       component: Login
