@@ -6,28 +6,43 @@ import VueRouter from 'vue-router'
 // 在配置文件中，已经进行根目录的配置。@符合就代码src根目录
 import Login from '@/views/login.vue'
 import Home from '@/views/home.vue'
+import Welcome from '@/views/welcome.vue'
+import Users from '@/views/users/users.vue'
 Vue.use(VueRouter)
 
 // 创建路由模块
 var router = new VueRouter({
-  routes: [
-    {
-      path: '/',
-      // 实现重定向
-      redirect: {
-        name: 'Login'
-      }
-    },
-    {
-      name: 'Login',
-      path: '/login',
-      component: Login
-    },
-    {
-      name: 'Home',
-      path: '/home',
-      component: Home
+  routes: [{
+    path: '/',
+    // 实现重定向
+    redirect: {
+      name: 'Login'
     }
+  },
+  {
+    name: 'Login',
+    path: '/login',
+    component: Login
+  },
+  {
+    name: 'Home',
+    path: '/home',
+    component: Home,
+    // 实现重定向
+    redirect: {
+      name: 'Welcome'
+    },
+    // 添加嵌套路由
+    children: [{
+      name: 'Welcome',
+      path: 'welcome',
+      component: Welcome
+    }, {
+      name: 'Users',
+      path: 'users',
+      component: Users
+    }]
+  }
   ]
 })
 

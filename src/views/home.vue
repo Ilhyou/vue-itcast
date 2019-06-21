@@ -2,10 +2,10 @@
   <div class="home">
     <el-container>
       <el-aside width="200px">
-        <img src="../assets/logo.png" alt="" class="logo">
+        <img src="../assets/logo.png" alt class="logo">
         <el-menu
-          :router='true'
-          :unique-opened='true'
+          :router="true"
+          :unique-opened="true"
           default-active="2"
           class="el-menu-vertical-demo"
           background-color="#545c64"
@@ -17,7 +17,7 @@
               <i class="el-icon-location"></i>
               <span>用户管理</span>
             </template>
-            <el-menu-item index="1-1">
+            <el-menu-item index="users">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>用户列表</span>
@@ -48,7 +48,9 @@
             <a href="javascript:;">退出</a>
           </div>
         </el-header>
-        <el-main>欢迎你使用电商后台管理系统</el-main>
+        <el-main>
+          <router-view></router-view>
+        </el-main>
       </el-container>
     </el-container>
   </div>

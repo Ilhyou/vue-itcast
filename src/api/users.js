@@ -13,3 +13,9 @@ export const userLogin = (data) => {
     data: data
   })
 }
+export const getAllList = (params) => {
+  return axios({
+    url: 'users',
+    params: params
+  })
+}
