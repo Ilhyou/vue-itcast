@@ -10,11 +10,12 @@
     <div style="margin-top: 15px;">
       <el-input
         placeholder="请输入内容"
-        v-model="userKey"
+        v-model="query"
         class="input-with-select"
         style="width:300px;margin-right:15px"
+        @keyup.enter.native="serachUser"
       >
-        <el-button slot="append" icon="el-icon-search"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click="serachUser"></el-button>
       </el-input>
       <el-button type="success" plain @click="addDialogFormVisible=true">添加用户</el-button>
     </div>
@@ -63,7 +64,12 @@
     ></el-pagination>
 
     <!-- 新增用户对话框 -->
-    <el-dialog title="新增用户" :visible.sync="addDialogFormVisible">
+    <!-- @close点击关闭按钮关闭对话框 清空表单 -->
+    <el-dialog
+      title="新增用户"
+      :visible.sync="addDialogFormVisible"
+      @close="$refs.addForm.resetFields()"
+    >
       <el-form :model="addForm" :rules="rules" ref="addForm" :label-width="'120px'">
         <el-form-item label="用户名称" prop="username">
           <el-input v-model="addForm.username" autocomplete="off"></el-input>
@@ -151,7 +157,7 @@ import {
   updateUserStatus,
   grantRole,
   getAllRoles
-} from '@/api/users.js';
+} from '@/api/users.js'
 export default {
   data () {
     return {
@@ -499,6 +505,10 @@ export default {
             type: 'error'
           })
         })
+    },
+    // 用户的搜索
+    serachUser () {
+      this.init()
     }
   }
 }
