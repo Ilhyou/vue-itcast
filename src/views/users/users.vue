@@ -43,7 +43,7 @@
             <el-button type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
-            <el-button type="success" icon="el-icon-share"></el-button>
+            <el-button type="success" icon="el-icon-share" @click="handleGrant(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
             <el-button type="warning" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
@@ -101,6 +101,30 @@
         <el-button type="primary" @click="edit">确 定</el-button>
       </div>
     </el-dialog>
+
+    <!-- 分配角色对话框 -->
+    <el-dialog title="分配角色" :visible.sync="roleDialogFormVisible">
+      <el-form ref="grantForm" :model="grantForm" :label-width="'120px'">
+        <el-form-item label="用户名">
+          <el-input v-model="grantForm.username" auto-complete="off" disabled></el-input>
+        </el-form-item>
+        <el-select v-model="myvalue" placeholder="请选择" @change="roleChange">
+          <!-- :label是options数据的label属性 只给用户看的 -->
+          <!-- :value是options数据的value属性 是我们要的 -->
+          <!-- v-model双向绑定的值与 :value一致 -->
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="roleDialogFormVisible = false;">取 消</el-button>
+        <el-button type="primary">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -120,7 +144,8 @@ import {
   addUser,
   editUser,
   delUser,
-  updateUserStatus
+  updateUserStatus,
+  grantRole
 } from '@/api/users.js'
 export default {
   data () {
@@ -135,8 +160,6 @@ export default {
       pagesize: 2,
       // 表格数据
       usersList: [],
-      // 状态
-      value2: '',
       // 用户数据总条数
       total: 0,
       // 控制新增用户对话框的显示和隐藏
@@ -179,6 +202,28 @@ export default {
         username: '',
         email: '',
         mobile: ''
+      },
+      // 控制分配角色对话框的显示和隐藏
+      roleDialogFormVisible: true,
+      // 下拉选项数据
+      options: [
+        {
+          value: '1',
+          label: '黄金糕'
+        },
+        {
+          value: '2',
+          label: '双皮奶'
+        }
+      ],
+      myvalue: '',
+      // 控制角色分配对话框的显示和隐藏
+      grantDialogFormVisible: true,
+      // 分配角色对应数据
+      grantForm: {
+        id: '',
+        rid: '',
+        username: ''
       }
     }
   },
@@ -389,6 +434,18 @@ export default {
             type: 'error'
           })
         })
+    },
+    // 分配角色
+    roleChange (value) {
+      // value是他的默认值 就是optionss数据中的value属性 就是:value 绑定的值
+      console.log(value, this.myvalue)
+    },
+    // 显示分配角色对话框
+    handleGrant (obj) {
+      console.log(obj)
+      this.roleDialogFormVisible = true
+      this.grantForm.username = obj.username
+      this.grantForm.id = obj.id
     }
   }
 }
