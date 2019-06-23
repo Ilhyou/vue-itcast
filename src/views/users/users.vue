@@ -32,7 +32,7 @@
       <el-table-column label="操作">
         <template slot-scope="scope">
           <el-tooltip class="item" effect="dark" content="编辑" placement="top">
-            <el-button type="primary" icon="el-icon-edit"></el-button>
+            <el-button type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="分配角色" placement="top">
             <el-button type="success" icon="el-icon-share"></el-button>
@@ -54,6 +54,7 @@
       :total="total"
     ></el-pagination>
 
+    <!-- 新增用户对话框 -->
     <el-dialog title="新增用户" :visible.sync="addDialogFormVisible">
       <el-form :model="addForm" :rules="rules" ref="addForm" :label-width="'120px'">
         <el-form-item label="用户名称" prop="username">
@@ -74,6 +75,24 @@
         <el-button type="primary" @click="add">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 编辑用户对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="editDialogFormVisible">
+      <el-form :model="editForm" :rules="rules" ref="editForm" :label-width="'120px'">
+        <el-form-item label="用户名称" prop="username">
+          <el-input v-model="editForm.username" autocomplete="off" disabled></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="editForm.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="editForm.mobile" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="editDialogFormVisible = false;$refs.editForm.resetFields()">取 消</el-button>
+        <el-button type="primary" @click="edit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -88,7 +107,7 @@
       :total="400" // 总记录数
  *
  */
-import { getAllList, addUser } from '@/api/users.js'
+import { getAllList, addUser, editUser } from '@/api/users.js'
 export default {
   data () {
     return {
@@ -115,7 +134,7 @@ export default {
         email: '',
         mobile: ''
       },
-      //   添加验证规则
+      // 添加新增用户和编辑用户验证规则
       rules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' }
@@ -137,6 +156,15 @@ export default {
           { required: true, message: '请输入手机号', trigger: 'blur' }
           // { message: '请输入正确的手机号', pattern: /^1\d{10}$/, trigger: 'blur' }
         ]
+      },
+      // 控制编辑用户对话框的显示和隐藏
+      editDialogFormVisible: false,
+      // 编辑数据的表单数据绑定对象
+      editForm: {
+        id: '',
+        username: '',
+        email: '',
+        mobile: ''
       }
     }
   },
@@ -174,8 +202,15 @@ export default {
           })
         })
     },
+    // 显示编辑用户对话框以及显示需要的数据
     handleEdit (row) {
       console.log(row)
+
+      this.editDialogFormVisible = true
+      this.editForm.id = row.id
+      this.editForm.username = row.username
+      this.editForm.email = row.email
+      this.editForm.mobile = row.mobile
     },
     handleDelete (row) {
       console.log(row)
@@ -207,6 +242,47 @@ export default {
                 this.addDialogFormVisible = false
                 // 表单元素的数据重置
                 this.$refs.addForm.resetFields()
+                // 数据刷新
+                this.init()
+              } else {
+                this.$message({
+                  message: res.data.meta.msg,
+                  type: 'error'
+                })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.$message({
+                message: 'error',
+                type: 'error'
+              })
+            })
+        } else {
+          // 给出用户提示
+          this.$message({
+            message: '数据输入不合法',
+            type: 'error'
+          })
+          return false
+        }
+      })
+    },
+    // 编辑用户
+    edit () {
+      this.$refs.editForm.validate(valid => {
+        if (valid) {
+          editUser(this.editForm)
+            .then(res => {
+              if (res.data.meta.status === 200) {
+                this.$message({
+                  type: 'success',
+                  message: res.data.meta.msg
+                })
+                // 隐藏弹出层
+                this.editDialogFormVisible = false
+                // 表单元素的数据重置
+                this.$refs.editForm.resetFields()
                 // 数据刷新
                 this.init()
               } else {
