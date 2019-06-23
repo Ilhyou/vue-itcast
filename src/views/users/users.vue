@@ -26,7 +26,15 @@
       <el-table-column prop="mobile" label="电话" width="300"></el-table-column>
       <el-table-column label="状态" width="120">
         <template slot-scope="scope">
-          <el-switch v-model="value2" active-color="#13ce66" inactive-color="#ff4949"></el-switch>
+          <!-- 之前都是绑定了同个属性值--value2,所以其中一个状态变化也会影响到其它switch的状态变化,而数据中有一个属性mg_state，它就是用来描述当前用户的状态 -->
+          <!-- <el-switch v-model="value2" active-color="#13ce66" inactive-color="#ff4949"></el-switch> -->
+          <!-- 为switch添加状态切换的事件：change事件就是在切换状态时的触发事件，这个事件有一个参数，就是当前状态 -->
+          <el-switch
+            v-model="scope.row.mg_state"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
+            @change="updateStatus(scope.row.mg_state,scope.row.id)"
+          ></el-switch>
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -107,7 +115,13 @@
       :total="400" // 总记录数
  *
  */
-import { getAllList, addUser, editUser, delUser } from '@/api/users.js'
+import {
+  getAllList,
+  addUser,
+  editUser,
+  delUser,
+  updateUserStatus
+} from '@/api/users.js'
 export default {
   data () {
     return {
@@ -344,6 +358,37 @@ export default {
           return false
         }
       })
+    },
+    // 修改用户状态
+    /**
+     *  - 这个事件如果没有传递参数，那么就默认的当前状态做为参数
+        - 如果你手动传递了参数，默认的参数就不会再进行传递，你可以手动的添加$event
+        - $event的值就是当前的状态值
+        - 你也可以将之前数据源数据双向绑定属性做为参数传递 scope.row.mg_state
+     */
+    updateStatus (type, id) {
+      console.log(type, id)
+      updateUserStatus(type, id)
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: res.data.meta.msg
+            })
+          } else {
+            this.$message({
+              message: res.data.meta.msg,
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
+          })
+        })
     }
   }
 }
