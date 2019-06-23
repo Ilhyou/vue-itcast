@@ -106,23 +106,27 @@
     <el-dialog title="分配角色" :visible.sync="roleDialogFormVisible">
       <el-form ref="grantForm" :model="grantForm" :label-width="'120px'">
         <el-form-item label="用户名">
-          <el-input v-model="grantForm.username" auto-complete="off" disabled></el-input>
+          <el-input v-model="grantForm.username" auto-complete="off" style="width:122px" disabled></el-input>
         </el-form-item>
-        <el-select v-model="myvalue" placeholder="请选择" @change="roleChange">
-          <!-- :label是options数据的label属性 只给用户看的 -->
-          <!-- :value是options数据的value属性 是我们要的 -->
-          <!-- v-model双向绑定的值与 :value一致 -->
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          ></el-option>
-        </el-select>
+        <el-form-item label="角色">
+          <!-- <el-select v-model="myvalue" placeholder="请选择" @change="roleChange"> -->
+          <!-- value-key作为 value 唯一标识的键名，绑定值为对象类型时必填  默认值value -->
+          <el-select value-key v-model="grantForm.rid" placeholder="请选择" @change="roleChange">
+            <!-- :label是options数据的label属性 只给用户看的 -->
+            <!-- :value是options数据的value属性 是我们要的 -->
+            <!-- v-model双向绑定的值与 :value一致  我们从接口文档上得知 我们需要rid这个参数 所以 v-model就绑定rid -->
+            <el-option
+              v-for="item in options"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="roleDialogFormVisible = false;">取 消</el-button>
-        <el-button type="primary">确 定</el-button>
+        <el-button type="primary" @click="grantRole">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -145,8 +149,9 @@ import {
   editUser,
   delUser,
   updateUserStatus,
-  grantRole
-} from '@/api/users.js'
+  grantRole,
+  getAllRoles
+} from '@/api/users.js';
 export default {
   data () {
     return {
@@ -204,21 +209,10 @@ export default {
         mobile: ''
       },
       // 控制分配角色对话框的显示和隐藏
-      roleDialogFormVisible: true,
+      roleDialogFormVisible: false,
       // 下拉选项数据
-      options: [
-        {
-          value: '1',
-          label: '黄金糕'
-        },
-        {
-          value: '2',
-          label: '双皮奶'
-        }
-      ],
+      options: [],
       myvalue: '',
-      // 控制角色分配对话框的显示和隐藏
-      grantDialogFormVisible: true,
       // 分配角色对应数据
       grantForm: {
         id: '',
@@ -438,14 +432,73 @@ export default {
     // 分配角色
     roleChange (value) {
       // value是他的默认值 就是optionss数据中的value属性 就是:value 绑定的值
-      console.log(value, this.myvalue)
+      // console.log(value, this.myvalue)
+      // this.grantForm.rid = value
     },
     // 显示分配角色对话框
     handleGrant (obj) {
+      // 清空下拉数据
+      this.options = []
       console.log(obj)
       this.roleDialogFormVisible = true
       this.grantForm.username = obj.username
       this.grantForm.id = obj.id
+      this.grantForm.rid = obj.role_name
+
+      // 获取角色数据列表
+      getAllRoles()
+        .then(res => {
+          console.log(res)
+          if (res.data.meta.status === 200) {
+            // let roleData = res.data.data
+            this.options = res.data.data
+            // for (var i = 0; i < roleData.length; i++) {
+            //   var obj = {
+            //     value: roleData[i].id,
+            //     label: roleData[i].roleName
+            //   }
+            //   // this.options.push(obj)
+            // }
+          } else {
+            this.$message({
+              message: res.data.meta.msg,
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
+          })
+        })
+    },
+    // 分配角色
+    grantRole () {
+      grantRole(this.grantForm.id, this.grantForm.rid)
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: res.data.meta.msg
+            })
+            this.init()
+            this.roleDialogFormVisible = false
+          } else {
+            this.$message({
+              message: res.data.meta.msg,
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
+          })
+        })
     }
   }
 }

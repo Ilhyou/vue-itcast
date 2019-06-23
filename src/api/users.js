@@ -82,3 +82,10 @@ export const grantRole = (id, rid) => {
     }
   })
 }
+
+// 获取角色列表
+export const getAllRoles = () => {
+  return axios({
+    url: `roles`
+  })
+}
