@@ -38,7 +38,7 @@
             <el-button type="success" icon="el-icon-share"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
-            <el-button type="warning" icon="el-icon-delete"></el-button>
+            <el-button type="warning" icon="el-icon-delete" @click="handleDelete(scope.row.id)"></el-button>
           </el-tooltip>
         </template>
       </el-table-column>
@@ -107,7 +107,7 @@
       :total="400" // 总记录数
  *
  */
-import { getAllList, addUser, editUser } from '@/api/users.js'
+import { getAllList, addUser, editUser, delUser } from '@/api/users.js'
 export default {
   data () {
     return {
@@ -212,8 +212,44 @@ export default {
       this.editForm.email = row.email
       this.editForm.mobile = row.mobile
     },
-    handleDelete (row) {
-      console.log(row)
+    // 弹出确定提示框删除用户
+    handleDelete (id) {
+      this.$confirm(`此操作将永久删除id号为${id}的用户, 是否继续?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delUser(id)
+            .then(res => {
+              if (res.data.meta.status === 200) {
+                this.$message({
+                  type: 'success',
+                  message: res.data.meta.msg
+                })
+                // 数据刷新
+                this.init()
+              } else {
+                this.$message({
+                  message: res.data.meta.msg,
+                  type: 'error'
+                })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.$message({
+                message: 'error',
+                type: 'error'
+              })
+            })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
     // 切换每页显示记录数时触发
     handleSizeChange (val) {
