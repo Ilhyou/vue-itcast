@@ -16,7 +16,7 @@
       >
         <el-button slot="append" icon="el-icon-search"></el-button>
       </el-input>
-      <el-button type="success" plain>添加用户</el-button>
+      <el-button type="success" plain @click="addDialogFormVisible=true">添加用户</el-button>
     </div>
     <!-- 表格 -->
     <el-table :data="usersList" border style="width: 100%;margin-top:15px">
@@ -53,6 +53,27 @@
       layout="total, sizes, prev, pager, next, jumper"
       :total="total"
     ></el-pagination>
+
+    <el-dialog title="新增用户" :visible.sync="addDialogFormVisible">
+      <el-form :model="addForm" :rules="rules" ref="addForm" :label-width="'120px'">
+        <el-form-item label="用户名称" prop="username">
+          <el-input v-model="addForm.username" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="手机号" prop="mobile">
+          <el-input v-model="addForm.mobile" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDialogFormVisible = false;$refs.addForm.resetFields()">取 消</el-button>
+        <el-button type="primary" @click="add">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -67,7 +88,7 @@
       :total="400" // 总记录数
  *
  */
-import { getAllList } from '@/api/users.js'
+import { getAllList, addUser } from '@/api/users.js'
 export default {
   data () {
     return {
@@ -84,7 +105,39 @@ export default {
       // 状态
       value2: '',
       // 用户数据总条数
-      total: 0
+      total: 0,
+      // 控制新增用户对话框的显示和隐藏
+      addDialogFormVisible: false,
+      // 新增数据的表单数据绑定对象
+      addForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      //   添加验证规则
+      rules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, max: 16, message: '长度在 6 到 16 个字符', trigger: 'blur' }
+        ],
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          {
+            message: '请输入合法的邮箱',
+            pattern: /\w+[@]\w+[.]\w+/,
+            trigger: 'blur'
+          }
+        ],
+        mobile: [
+          // wuhu0723@126.com
+          { required: true, message: '请输入手机号', trigger: 'blur' }
+          // { message: '请输入正确的手机号', pattern: /^1\d{10}$/, trigger: 'blur' }
+        ]
+      }
     }
   },
   // 页面加载完成就去获取用户列表数据
@@ -138,6 +191,47 @@ export default {
       console.log(`当前页: ${val}`)
       this.pagenum = val
       this.init()
+    },
+    // 新增用户
+    add () {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          addUser(this.addForm)
+            .then(res => {
+              if (res.data.meta.status === 201) {
+                this.$message({
+                  type: 'success',
+                  message: res.data.meta.msg
+                })
+                // 隐藏弹出层
+                this.addDialogFormVisible = false
+                // 表单元素的数据重置
+                this.$refs.addForm.resetFields()
+                // 数据刷新
+                this.init()
+              } else {
+                this.$message({
+                  message: res.data.meta.msg,
+                  type: 'error'
+                })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+              this.$message({
+                message: 'error',
+                type: 'error'
+              })
+            })
+        } else {
+          // 给出用户提示
+          this.$message({
+            message: '数据输入不合法',
+            type: 'error'
+          })
+          return false
+        }
+      })
     }
   }
 }

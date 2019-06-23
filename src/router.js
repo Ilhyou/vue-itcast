@@ -9,7 +9,6 @@ import Home from '@/views/home.vue'
 import Welcome from '@/views/welcome.vue'
 import Users from '@/views/users/users.vue'
 Vue.use(VueRouter)
-
 // 创建路由模块
 var router = new VueRouter({
   routes: [{
@@ -45,6 +44,5 @@ var router = new VueRouter({
   }
   ]
 })
-
 // module.exports = router
 export default router
