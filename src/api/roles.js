@@ -38,3 +38,12 @@ export const removeRightByRid = (roleId, rightId) => {
     url: `roles/${roleId}/rights/${rightId}`
   })
 }
+
+// 添加角色
+export const addRole = (data) => {
+  return axios({
+    method: 'post',
+    url: 'roles',
+    data
+  })
+}

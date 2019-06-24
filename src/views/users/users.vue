@@ -377,7 +377,7 @@ export default {
               }
             })
             .catch(err => {
-              // console.log(err)
+              console.log(err)
               this.$message({
                 message: 'error',
                 type: 'error'

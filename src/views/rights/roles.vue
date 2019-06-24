@@ -8,7 +8,7 @@
     </el-breadcrumb>
     <!-- 添加角色 -->
     <div style="margin-top: 15px;">
-      <el-button type="success" plain>添加角色</el-button>
+      <el-button type="success" plain @click="addDialogFormVisible=true">添加角色</el-button>
     </div>
     <!-- 表格 -->
     <el-table :data="rolesList" border style="width: 100%;margin-top: 15px;">
@@ -65,40 +65,74 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <!-- 新增角色对话框 -->
+    <el-dialog title="添加角色" :visible.sync="addDialogFormVisible">
+      <el-form :model="addForm" :rules="rules" ref="addForm" :label-width="'120px'">
+        <el-form-item label="角色名称" prop="roleName">
+          <el-input v-model="addForm.roleName" autocomplete="off" placeholder="请输入角色名称"></el-input>
+        </el-form-item>
+        <el-form-item label="角色描述">
+          <el-input v-model="addForm.roleDesc" autocomplete="off" placeholder="请输入角色描述"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="addDialogFormVisible = false;$refs.addForm.resetFields()">取 消</el-button>
+        <el-button type="primary" @click="addRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
-import { getAllRoles, removeRightByRid } from '@/api/roles.js'
+import { getAllRoles, removeRightByRid, addRole } from '@/api/roles.js'
 export default {
   data () {
     return {
-      rolesList: []
+      // 角色列表数据
+      rolesList: [],
+      // 控制新增角色对话框的显示与隐藏
+      addDialogFormVisible: false,
+      // 新增角色数据的表单数据绑定对象
+      addForm: {
+        roleName: '',
+        roleDesc: ''
+      },
+      // 添加新增和编辑验证规则
+      rules: {
+        roleName: [
+          { required: true, message: '请输入角色名称', trigger: 'blur' }
+        ]
+      }
     }
   },
   mounted () {
     // 获取角色数据列表
-    getAllRoles()
-      .then(res => {
-        if (res.data.meta.status === 200) {
-          console.log(res)
-          this.rolesList = res.data.data
-        } else {
-          this.$message({
-            message: res.data.meta.msg,
-            type: 'error'
-          })
-        }
-      })
-      .catch(err => {
-        console.log(err)
-        this.$message({
-          message: 'error',
-          type: 'error'
-        })
-      })
+    this.init()
   },
   methods: {
-    // 删除角色权限
+    // 获取角色数据列表
+    init () {
+      getAllRoles()
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            console.log(res)
+            this.rolesList = res.data.data
+          } else {
+            this.$message({
+              message: res.data.meta.msg,
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
+          })
+        })
+    },
+    // 删除角色权限 g根据角色id
     removeRight (obj, rightId) {
       console.log(obj)
       removeRightByRid(obj.id, rightId)
@@ -123,6 +157,41 @@ export default {
             type: 'error'
           })
         })
+    },
+    // 新增角色
+    addRole () {
+      this.$refs.addForm.validate(valid => {
+        if (valid) {
+          addRole(this.addForm)
+            .then(res => {
+              if (res.data.meta.status === 201) {
+                this.$message({
+                  type: 'success',
+                  message: res.data.meta.msg
+                })
+                // 隐藏弹出层
+                this.addDialogFormVisible = false
+                // 数据刷新
+                this.init()
+              } else {
+                this.$message({
+                  message: res.data.meta.msg,
+                  type: 'error'
+                })
+              }
+            })
+            .catch(err => {
+              console.log(err)
+            })
+        } else {
+          // 给出用户提示
+          this.$message({
+            message: '数据输入不合法',
+            type: 'error'
+          })
+          return false
+        }
+      })
     }
   }
 }
