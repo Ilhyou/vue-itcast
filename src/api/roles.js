@@ -64,3 +64,14 @@ export const delRole = (id) => {
     url: `roles/${id}`
   })
 }
+
+// 授权角色提交
+export const rightRole = (id, rids) => {
+  return axios({
+    method: 'post',
+    url: `roles/${id}/rights`,
+    data: {
+      rids
+    }
+  })
+}

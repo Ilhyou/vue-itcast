@@ -57,7 +57,7 @@
             <el-button type="primary" icon="el-icon-edit" @click="handleEdit(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="角色授权" placement="top">
-            <el-button type="success" icon="el-icon-share"></el-button>
+            <el-button type="success" icon="el-icon-share" @click="handleRight(scope.row)"></el-button>
           </el-tooltip>
           <el-tooltip class="item" effect="dark" content="删除" placement="top">
             <el-button type="warning" icon="el-icon-delete" @click="handleDel(scope.row.id)"></el-button>
@@ -101,6 +101,36 @@
         <el-button type="primary" @click="edit">确 定</el-button>
       </div>
     </el-dialog>
+    <!-- 角色授权对话框 -->
+    <el-dialog title="角色授权" :visible.sync="grantDialogFormVisible">
+      <div>
+        <!-- 分别通过default-expanded-keys和default-checked-keys设置默认展开和默认选中的节点。需要注意的是，此时必须设置node-key，其值为节点数据中的一个字段名，该字段在整棵树中是唯一的。 -->
+        <!--
+            el-tree  :default-checked-keys	默认勾选的节点的 key 的数组
+             :default-expanded-keys	默认展开的节点的 key 的数组
+             :default-expand-all 是否默认展开所有节点
+
+            props
+                label   指定节点标签为节点对象的某个属性值
+                children   指定子树为节点对象的某个属性值
+        -->
+        <el-tree
+          :data="rightsList"
+          show-checkbox
+          node-key="id"
+          :default-expanded-keys="[2,3]"
+          :default-expand-all="true"
+          :default-checked-keys="defaultCheckedArr"
+          :props="defaultProps"
+          style="overflow: scroll;height: 350px;"
+          ref="tree"
+        ></el-tree>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="grantDialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submitRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -109,8 +139,10 @@ import {
   removeRightByRid,
   addRole,
   editRole,
-  delRole
+  delRole,
+  rightRole
 } from '@/api/roles.js'
+import { getAllRightList } from '@/api/right.js'
 export default {
   data () {
     return {
@@ -136,7 +168,19 @@ export default {
         roleName: '',
         roleDesc: '',
         id: 0
-      }
+      },
+      // 控制授权角色对话框的显示与隐藏
+      grantDialogFormVisible: false,
+      // 树形数据
+      rightsList: [],
+      defaultProps: {
+        children: 'children',
+        label: 'authName'
+      },
+      // 默认选中数据
+      defaultCheckedArr: [],
+      // 存储角色id
+      rid: 0
     }
   },
   mounted () {
@@ -311,6 +355,93 @@ export default {
           this.$message({
             type: 'info',
             message: '已取消删除'
+          })
+        })
+    },
+    // 点击打开角色授权对话框
+    handleRight (obj) {
+      console.log(obj)
+      this.rid = obj.id
+
+      this.grantDialogFormVisible = true
+      getAllRightList('tree')
+        .then(res => {
+          console.log(res)
+          if (res.data.meta.status === 200) {
+            this.rightsList = res.data.data
+          } else {
+            this.$message({
+              type: 'error',
+              message: res.data.meta.msg
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
+          })
+        })
+      this.defaultCheckedArr = []
+      console.log(this.defaultCheckedArr)
+      if (obj.children.length > 0) {
+        obj.children.forEach((first, index) => {
+          if (first.children.length > 0) {
+            first.children.forEach((second, index) => {
+              if (second.children.length > 0) {
+                second.children.forEach((item, index) => {
+                  console.log(item.id)
+                  this.defaultCheckedArr.push(item.id)
+                })
+              }
+            })
+          }
+        })
+      }
+      console.log(this.defaultCheckedArr)
+    },
+    // 角色授权提交
+    submitRole () {
+      /**
+       *
+       * getCheckedKeys  若节点可被选择（即 show-checkbox 为 true），则返回目前被选中的节点的 key 所组成的数组
+       * getHalfCheckedKeys 若节点可被选择（即 show-checkbox 为 true），则返回目前半选中的节点的 key 所组成的数组
+       */
+      // console.log(this.$refs.tree.getCurrentKey())
+      console.log([
+        ...this.$refs.tree.getCheckedKeys(),
+        ...this.$refs.tree.getHalfCheckedKeys()
+      ])
+      var arr = [
+        ...this.$refs.tree.getCheckedKeys(),
+        ...this.$refs.tree.getHalfCheckedKeys()
+      ]
+      console.log(arr.join(','))
+      console.log(typeof arr.join(','))
+      rightRole(this.rid, arr.join(','))
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message({
+              type: 'success',
+              message: res.data.meta.msg
+            })
+            // 刷新数据
+            this.init()
+            // 隐藏对话框
+            this.grantDialogFormVisible = false
+          } else {
+            this.$message({
+              type: 'error',
+              message: res.data.meta.msg
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
           })
         })
     }
