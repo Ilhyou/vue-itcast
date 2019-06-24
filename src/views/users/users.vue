@@ -10,12 +10,12 @@
     <div style="margin-top: 15px;">
       <el-input
         placeholder="请输入内容"
-        v-model="query"
+        v-model="userKey"
         class="input-with-select"
         style="width:300px;margin-right:15px"
-        @keyup.enter.native="serachUser"
+        @keyup.enter.native="init"
       >
-        <el-button slot="append" icon="el-icon-search" @click="serachUser"></el-button>
+        <el-button slot="append" icon="el-icon-search" @click="init"></el-button>
       </el-input>
       <el-button type="success" plain @click="addDialogFormVisible=true">添加用户</el-button>
     </div>
@@ -117,12 +117,12 @@
         <el-form-item label="角色">
           <!-- <el-select v-model="myvalue" placeholder="请选择" @change="roleChange"> -->
           <!-- value-key作为 value 唯一标识的键名，绑定值为对象类型时必填  默认值value -->
-          <el-select value-key v-model="grantForm.rid" placeholder="请选择" @change="roleChange">
-            <!-- :label是options数据的label属性 只给用户看的 -->
-            <!-- :value是options数据的value属性 是我们要的 -->
+          <el-select v-model="grantForm.rid" placeholder="请选择" @change="roleChange">
+            <!-- :label是roleList数据的label属性 只给用户看的 -->
+            <!-- :value是roleList数据的value属性 是我们要的 -->
             <!-- v-model双向绑定的值与 :value一致  我们从接口文档上得知 我们需要rid这个参数 所以 v-model就绑定rid -->
             <el-option
-              v-for="item in options"
+              v-for="item in roleList"
               :key="item.id"
               :label="item.roleName"
               :value="item.id"
@@ -155,9 +155,9 @@ import {
   editUser,
   delUser,
   updateUserStatus,
-  grantRole,
-  getAllRoles
+  grantRole
 } from '@/api/users.js'
+import { getAllRoles } from '@/api/roles.js'
 export default {
   data () {
     return {
@@ -217,7 +217,8 @@ export default {
       // 控制分配角色对话框的显示和隐藏
       roleDialogFormVisible: false,
       // 下拉选项数据
-      options: [],
+      roleList: [],
+      // 下拉双向绑定
       myvalue: '',
       // 分配角色对应数据
       grantForm: {
@@ -230,17 +231,46 @@ export default {
   // 页面加载完成就去获取用户列表数据
   mounted () {
     this.init()
+
+    // 获取角色数据列表
+    getAllRoles()
+      .then(res => {
+        // console.log(res)
+        if (res.data.meta.status === 200) {
+          // let roleData = res.data.data
+          this.roleList = res.data.data
+          // for (var i = 0; i < roleData.length; i++) {
+          //   var obj = {
+          //     value: roleData[i].id,
+          //     label: roleData[i].roleName
+          //   }
+          //   // this.roleList.push(obj)
+          // }
+        } else {
+          this.$message({
+            message: res.data.meta.msg,
+            type: 'error'
+          })
+        }
+      })
+      .catch(err => {
+        // console.log(err)
+        this.$message({
+          message: 'error',
+          type: 'error'
+        })
+      })
   },
   methods: {
     // 获取数据
     init () {
       getAllList({
-        query: this.query,
+        query: this.userKey,
         pagenum: this.pagenum,
         pagesize: this.pagesize
       })
         .then(res => {
-          console.log(res)
+          // console.log(res)
           if (res.data.meta.status === 400) {
             this.$message({
               message: res.data.meta.msg,
@@ -254,7 +284,7 @@ export default {
           }
         })
         .catch(err => {
-          console.log(err)
+          // console.log(err)
           this.$message({
             message: '服务器异常,请重试',
             type: 'error'
@@ -263,7 +293,7 @@ export default {
     },
     // 显示编辑用户对话框以及显示需要的数据
     handleEdit (row) {
-      console.log(row)
+      // console.log(row)
 
       this.editDialogFormVisible = true
       this.editForm.id = row.id
@@ -296,7 +326,7 @@ export default {
               }
             })
             .catch(err => {
-              console.log(err)
+              // console.log(err)
               this.$message({
                 message: 'error',
                 type: 'error'
@@ -312,13 +342,13 @@ export default {
     },
     // 切换每页显示记录数时触发
     handleSizeChange (val) {
-      console.log(`每页 ${val} 条`)
+      // console.log(`每页 ${val} 条`)
       this.pagesize = val
       this.init()
     },
     // 切换当前页码时触发
     handleCurrentChange (val) {
-      console.log(`当前页: ${val}`)
+      // console.log(`当前页: ${val}`)
       this.pagenum = val
       this.init()
     },
@@ -347,7 +377,7 @@ export default {
               }
             })
             .catch(err => {
-              console.log(err)
+              // console.log(err)
               this.$message({
                 message: 'error',
                 type: 'error'
@@ -388,7 +418,7 @@ export default {
               }
             })
             .catch(err => {
-              console.log(err)
+              // console.log(err)
               this.$message({
                 message: 'error',
                 type: 'error'
@@ -412,7 +442,7 @@ export default {
         - 你也可以将之前数据源数据双向绑定属性做为参数传递 scope.row.mg_state
      */
     updateStatus (type, id) {
-      console.log(type, id)
+      // console.log(type, id)
       updateUserStatus(type, id)
         .then(res => {
           if (res.data.meta.status === 200) {
@@ -428,87 +458,61 @@ export default {
           }
         })
         .catch(err => {
-          console.log(err)
+          // console.log(err)
           this.$message({
             message: 'error',
             type: 'error'
           })
         })
     },
-    // 分配角色
+    // 分配角色 选择下拉列表的时候触发
     roleChange (value) {
-      // value是他的默认值 就是optionss数据中的value属性 就是:value 绑定的值
-      // console.log(value, this.myvalue)
-      // this.grantForm.rid = value
+      // value是他的默认值 就是roleLists数据中的value属性 就是:value 绑定的值
+      // // console.log(value, this.myvalue)
+      this.grantForm.rid = value
     },
     // 显示分配角色对话框
     handleGrant (obj) {
-      // 清空下拉数据
-      this.options = []
-      console.log(obj)
+      // console.log(obj)
       this.roleDialogFormVisible = true
       this.grantForm.username = obj.username
       this.grantForm.id = obj.id
-      this.grantForm.rid = obj.role_name
-
-      // 获取角色数据列表
-      getAllRoles()
-        .then(res => {
-          console.log(res)
-          if (res.data.meta.status === 200) {
-            // let roleData = res.data.data
-            this.options = res.data.data
-            // for (var i = 0; i < roleData.length; i++) {
-            //   var obj = {
-            //     value: roleData[i].id,
-            //     label: roleData[i].roleName
-            //   }
-            //   // this.options.push(obj)
-            // }
-          } else {
-            this.$message({
-              message: res.data.meta.msg,
-              type: 'error'
-            })
-          }
-        })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: 'error',
-            type: 'error'
-          })
-        })
+      // 让下拉列表有默认选项选中
+      this.grantForm.rid = obj.rid
     },
-    // 分配角色
+    // 分配角色提交
     grantRole () {
-      grantRole(this.grantForm.id, this.grantForm.rid)
-        .then(res => {
-          if (res.data.meta.status === 200) {
+      // console.log(this.grantForm)
+      if (this.grantForm.rid) {
+        grantRole(this.grantForm.id, this.grantForm.rid)
+          .then(res => {
+            if (res.data.meta.status === 200) {
+              this.$message({
+                type: 'success',
+                message: res.data.meta.msg
+              })
+              this.roleDialogFormVisible = false
+              this.init()
+            } else {
+              this.$message({
+                message: res.data.meta.msg,
+                type: 'error'
+              })
+            }
+          })
+          .catch(err => {
+            // console.log(err)
             this.$message({
-              type: 'success',
-              message: res.data.meta.msg
-            })
-            this.init()
-            this.roleDialogFormVisible = false
-          } else {
-            this.$message({
-              message: res.data.meta.msg,
+              message: 'error',
               type: 'error'
             })
-          }
-        })
-        .catch(err => {
-          console.log(err)
-          this.$message({
-            message: 'error',
-            type: 'error'
           })
+      } else {
+        this.$message({
+          type: 'warning',
+          message: '请先选择一个角色'
         })
-    },
-    // 用户的搜索
-    serachUser () {
-      this.init()
+      }
     }
   }
 }
