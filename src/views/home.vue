@@ -30,7 +30,7 @@
               <i class="el-icon-location"></i>
               <span>权限管理</span>
             </template>
-            <el-menu-item index="2-1">
+            <el-menu-item index="/home/roles">
               <template slot="title">
                 <i class="el-icon-location"></i>
                 <span>角色列表</span>
@@ -48,7 +48,7 @@
       <el-container>
         <el-header>
           <span class="myicon myicon-menu toggle-btn"></span>
-          <h3 class="system-title">后台管理系统</h3>
+          <h3 class="system-title">齐林河的后台管理系统</h3>
           <div class="welcome">
             <span>你好：admin</span> &nbsp;&nbsp;&nbsp;
             <a href="javascript:;">退出</a>
