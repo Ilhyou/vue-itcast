@@ -8,6 +8,7 @@ import Login from '@/views/login.vue'
 import Home from '@/views/home.vue'
 import Welcome from '@/views/welcome.vue'
 import Users from '@/views/users/users.vue'
+import Right from '@/views/rights/right.vue'
 Vue.use(VueRouter)
 // 创建路由模块
 var router = new VueRouter({
@@ -40,9 +41,12 @@ var router = new VueRouter({
       name: 'Users',
       path: 'users',
       component: Users
+    }, {
+      name: 'Right',
+      path: 'right',
+      component: Right
     }]
-  }
-  ]
+  }]
 })
 // module.exports = router
 export default router
