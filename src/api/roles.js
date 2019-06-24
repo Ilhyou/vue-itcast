@@ -47,3 +47,20 @@ export const addRole = (data) => {
     data
   })
 }
+
+// 编辑角色
+export const editRole = (data) => {
+  return axios({
+    method: 'put',
+    url: `roles/${data.id}`,
+    data
+  })
+}
+
+// 删除角色
+export const delRole = (id) => {
+  return axios({
+    method: 'delete',
+    url: `roles/${id}`
+  })
+}
