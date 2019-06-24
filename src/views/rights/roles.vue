@@ -216,11 +216,24 @@ export default {
       removeRightByRid(obj.id, rightId)
         .then(res => {
           if (res.data.meta.status === 200) {
+            console.log(res)
             this.$message({
               message: res.data.meta.msg,
               type: 'success'
             })
             obj.children = res.data.data
+            // var arr = res.data.data
+            // arr.forEach((first, index) => {
+            //   if (first.children.length > 0) {
+            //     first.children.forEach((second, index) => {
+            //       if (second.children.length > 0) {
+            //         obj.children = res.data.data
+            //       } else {
+            //         obj.children = []
+            //       }
+            //     })
+            //   }
+            // })
           } else {
             this.$message({
               message: res.data.meta.msg,
