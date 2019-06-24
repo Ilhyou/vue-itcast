@@ -37,6 +37,7 @@
                     v-for="third in second.children"
                     :key="third.id"
                     style="margin-bottom:15px;margin-right:5px;"
+                    @close="removeRight(scope.row,third.id)"
                   >{{third.authName}}</el-tag>
                 </el-col>
               </el-row>
@@ -67,7 +68,7 @@
   </div>
 </template>
 <script>
-import { getAllRoles } from '@/api/roles.js'
+import { getAllRoles, removeRightByRid } from '@/api/roles.js'
 export default {
   data () {
     return {
@@ -95,6 +96,34 @@ export default {
           type: 'error'
         })
       })
+  },
+  methods: {
+    // 删除角色权限
+    removeRight (obj, rightId) {
+      console.log(obj)
+      removeRightByRid(obj.id, rightId)
+        .then(res => {
+          if (res.data.meta.status === 200) {
+            this.$message({
+              message: res.data.meta.msg,
+              type: 'success'
+            })
+            obj.children = res.data.data
+          } else {
+            this.$message({
+              message: res.data.meta.msg,
+              type: 'error'
+            })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+          this.$message({
+            message: 'error',
+            type: 'error'
+          })
+        })
+    }
   }
 }
 </script>

@@ -25,3 +25,16 @@ export const getAllRoles = () => {
     url: `roles`
   })
 }
+
+// 删除角色权限根据角色id
+/**
+ *
+ * @param {string} roleId 角色id
+ * @param {string} rightId  权限id
+ */
+export const removeRightByRid = (roleId, rightId) => {
+  return axios({
+    method: 'delete',
+    url: `roles/${roleId}/rights/${rightId}`
+  })
+}
