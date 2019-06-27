@@ -236,14 +236,14 @@ export default {
                   console.log(1)
                   first.children.forEach((second, index) => {
                     if (second.children.length === 0) {
-                      delRight(row.id, second.id).then(res => {
+                      removeRightByRid(row.id, second.id).then(res => {
                         if (res.data.meta.status === 200) {
                           row.children = res.data.data
                           console.log(row.children)
                           row.children.forEach((third, index) => {
                             console.log(third)
                             if (third.children.length === 0) {
-                              delRight(row.id, third.id).then(res => {
+                              removeRightByRid(row.id, third.id).then(res => {
                                 if (res.data.meta.status === 200) {
                                   console.log(res.data.data)
                                   row.children = res.data.data
