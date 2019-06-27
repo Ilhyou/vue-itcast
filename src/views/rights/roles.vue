@@ -256,7 +256,7 @@ export default {
                     }
                   })
                 } else {
-                  delRight(row.id, first.id).then(res => {
+                  removeRightByRid(row.id, first.id).then(res => {
                     if (res.data.meta.status === 200) {
                       console.log(res.data.data)
                       row.children = res.data.data
