@@ -59,22 +59,24 @@ var router = new VueRouter({
       name: 'Goods',
       path: 'goods',
       component: Goods,
-      redirect: { name: 'List' },
-      children: [
-        {
-          name: 'List',
-          path: 'list',
-          component: List
-        },
-        {
-          name: 'Add',
-          path: 'add',
-          component: Add
-        }
+      redirect: {
+        name: 'List'
+      },
+      children: [{
+        name: 'List',
+        path: 'list',
+        component: List
+      },
+      {
+        name: 'Add',
+        path: 'add',
+        component: Add
+      }
       ]
     }
     ]
-  }]
+  }
+  ]
 })
 // module.exports = router
 export default router
