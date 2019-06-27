@@ -15,26 +15,103 @@
         <el-step title="步骤 3"></el-step>
         <el-step title="步骤 4"></el-step>
       </el-steps>
-      <!-- tabs标签页 -->
-      <!--
+      <el-form style="margin-top:15px" label-width="80px">
+        <!-- tabs标签页 -->
+        <!--
         tab-position:用来设置标签页导航项的位置，内容与这个位置对应，如导航在top，内容就在bottom
         v-model='activeName',用来设置当前被激活的内容面板，这个值就应该设置为内容面板的name属性的值
-      -->
-      <el-tabs v-model="activeName" tab-position="left" style="margin-top:15px">
-        <el-tab-pane label="基本参数" name="0">基本参数</el-tab-pane>
-        <el-tab-pane label="上传图片" name="1">上传图片</el-tab-pane>
-        <el-tab-pane label="商品描述" name="2">商品描述</el-tab-pane>
-        <el-tab-pane label="定时任务补偿" name="3">定时任务补偿</el-tab-pane>
-      </el-tabs>
+        -->
+        <el-tabs v-model="activeName" tab-position="left" style="margin-top:15px">
+          <el-tab-pane label="基本参数" name="0">
+            <el-form-item label="商品名称">
+              <el-input v-model="goodsForm.goods_name"></el-input>
+            </el-form-item>
+            <el-form-item label="商品价格">
+              <el-input v-model="goodsForm.goods_price" max="100" min="0" step="0.1" type="number"></el-input>
+            </el-form-item>
+            <el-form-item label="商品数量">
+              <el-input v-model="goodsForm.goods_number"></el-input>
+            </el-form-item>
+            <el-form-item label="商品重量">
+              <el-input v-model="goodsForm.goods_weight"></el-input>
+            </el-form-item>
+            <el-form-item label="商品分类">
+              <!-- 添加级联选择器 -->
+              <!--
+                :options="options"  //数据源
+                :props=""  // 配置选项
+                clearable> //可清空
+              -->
+              <!--
+                props:
+                  value    指定选项的值为选项对象的某个属性值
+                  label    指定选项标签为选项对象的某个属性值
+                  children 指定选项的子选项为选项对象的某个属性值
+              -->
+              <el-cascader :options="cateList" :props="cateprops" clearable></el-cascader>
+            </el-form-item>
+          </el-tab-pane>
+          <el-tab-pane label="上传图片" name="1">上传图片</el-tab-pane>
+          <el-tab-pane label="商品描述" name="2">商品描述</el-tab-pane>
+          <el-tab-pane label="定时任务补偿" name="3">定时任务补偿</el-tab-pane>
+        </el-tabs>
+        <el-button type="success">添加商品</el-button>
+      </el-form>
     </el-card>
   </div>
 </template>
 <script>
+import { getCategoriesList } from '@/api/category.js'
 export default {
   data () {
     return {
-      activeName: '0'
+      // 标签页当前被激活的内容面板
+      activeName: '0',
+      // 基本参数数据
+      goodsForm: {
+        goods_name: '',
+        goods_cat: '',
+        goods_price: '',
+        goods_number: '',
+        goods_weight: '',
+        goods_introduce: '',
+        pics: [],
+        atts: []
+      },
+      // 所有分类数据
+      cateList: [],
+      // props选项对象
+      cateprops: {
+        value: 'cat_id',
+        label: 'cat_name',
+        children: 'children'
+      }
     }
+  },
+  mounted () {
+    getCategoriesList([3])
+      .then(res => {
+        console.log(res)
+        if (res.data.meta.status === 200) {
+          this.cateList = res.data.data
+        } else if (res.data.meta.status === 401) {
+          this.$message({
+            type: 'warning',
+            message: res.data.meta.msg
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.data.meta.msg
+          })
+        }
+      })
+      .catch(() => {
+        this.$message({
+          type: 'error',
+          message: 'error'
+        })
+      })
   }
 }
 </script>
