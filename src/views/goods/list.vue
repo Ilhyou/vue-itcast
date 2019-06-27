@@ -8,7 +8,7 @@
     </el-breadcrumb>
     <el-card class="box-card">
       <!-- 搜索区域 -->
-      <div style="margin-top: 15px;">
+      <div>
         <el-input
           placeholder="请输入内容"
           v-model="userKey"
@@ -17,7 +17,7 @@
         >
           <el-button slot="append" icon="el-icon-search"></el-button>
         </el-input>
-        <el-button type="success" plain @click="$router.push({name:'Add'})">添加用户</el-button>
+        <el-button type="success" plain @click="$router.push({name:'Add'})">添加商品</el-button>
       </div>
       <!-- 表格区域 -->
       <el-table :data="goodsList" border style="width: 100%;margin-top:15px">
