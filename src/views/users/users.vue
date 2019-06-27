@@ -121,6 +121,8 @@
             <!-- :label是roleList数据的label属性 只给用户看的 -->
             <!-- :value是roleList数据的value属性 是我们要的 -->
             <!-- v-model双向绑定的值与 :value一致  我们从接口文档上得知 我们需要rid这个参数 所以 v-model就绑定rid -->
+            <!-- v-model：后期用户选择数据所对应的:value值就会和这个v-model中的数据进行绑定 -->
+            <!-- 为下拉列表的v-model赋值一个id，这个id会对应着下拉列表的value，如果赋值了Value，那么就会让这个value数据所对应的字符串数据显示 -->
             <el-option
               v-for="item in roleList"
               :key="item.id"
@@ -284,7 +286,7 @@ export default {
           }
         })
         .catch(err => {
-          // console.log(err)
+          console.log(err)
           this.$message({
             message: '服务器异常,请重试',
             type: 'error'
@@ -458,14 +460,14 @@ export default {
           }
         })
         .catch(err => {
-          // console.log(err)
+          console.log(err)
           this.$message({
             message: 'error',
             type: 'error'
           })
         })
     },
-    // 分配角色 选择下拉列表的时候触发
+    // 分配角色 选择下拉列表的时候触发 下拉列表切换
     roleChange (value) {
       // value是他的默认值 就是roleLists数据中的value属性 就是:value 绑定的值
       // // console.log(value, this.myvalue)
