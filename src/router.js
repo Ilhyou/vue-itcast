@@ -44,7 +44,7 @@ var router = new VueRouter({
       component: Users
     }, {
       name: 'Right',
-      path: 'right',
+      path: 'rights',
       component: Right
     },
     {

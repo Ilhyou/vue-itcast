@@ -3,6 +3,11 @@
     <el-container>
       <el-aside width="200px">
         <img src="../assets/logo.png" alt class="logo">
+        <!--
+          路由映射组件
+          映射就是指：让路由所对应的组件在指定router-view中展示
+          指定router-view：关注组件的嵌套结构
+        -->
         <el-menu
           :router="true"
           :unique-opened="true"
@@ -12,34 +17,15 @@
           text-color="#fff"
           active-text-color="#ffd04b"
         >
-          <el-submenu index="1">
+          <el-submenu :index="first.path" v-for="first in menuList" :key="first.id">
             <template slot="title">
               <i class="el-icon-location"></i>
-              <span>用户管理</span>
+              <span>{{first.authName}}</span>
             </template>
-            <el-menu-item index="/home/users">
+            <el-menu-item :index="'/home/'+item.path" v-for="item in first.children" :key="item.id">
               <template slot="title">
                 <i class="el-icon-location"></i>
-                <span>用户列表</span>
-              </template>
-            </el-menu-item>
-          </el-submenu>
-
-          <el-submenu index="2">
-            <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>权限管理</span>
-            </template>
-            <el-menu-item index="/home/roles">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>角色列表</span>
-              </template>
-            </el-menu-item>
-            <el-menu-item index="/home/right">
-              <template slot="title">
-                <i class="el-icon-location"></i>
-                <span>权限列表</span>
+                <span>{{item.authName}}</span>
               </template>
             </el-menu-item>
           </el-submenu>
@@ -62,7 +48,31 @@
   </div>
 </template>
 <script>
-export default {}
+import { getLeftMenu } from '@/api/right.js'
+export default {
+  data () {
+    return {
+      menuList: []
+    }
+  },
+  mounted () {
+    getLeftMenu()
+      .then(res => {
+        if (res.data.meta.status === 200) {
+          console.log(res)
+          this.menuList = res.data.data
+        } else {
+          this.$message({
+            type: 'error',
+            message: res.data.meta.msg
+          })
+        }
+      })
+      .catch(err => {
+        console.log(err)
+      })
+  }
+}
 </script>
 <style lang="less" scoped>
 .home {

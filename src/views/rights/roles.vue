@@ -84,7 +84,7 @@
     >
       <el-form :model="addForm" :rules="rules" ref="addForm" :label-width="'120px'">
         <el-form-item label="角色名称" prop="roleName">
-          <el-input v-model="addForm.roleName" autocomplete="off" placeholder="请输入角色名称"></el-input>
+          <el-input v-model="addForm.roleName" autocomplete="off" placeholder="请输入角色名称" v-focus></el-input>
         </el-form-item>
         <el-form-item label="角色描述">
           <el-input v-model="addForm.roleDesc" autocomplete="off" placeholder="请输入角色描述"></el-input>
@@ -173,7 +173,7 @@ export default {
       editDialogFormVisible: false,
       // 编辑角色数据的表单数据绑定对象
       editForm: {
-        roleName: '',
+        roleName: '123',
         roleDesc: '',
         id: 0
       },
@@ -189,6 +189,17 @@ export default {
       defaultCheckedArr: [],
       // 存储角色id
       rid: 0
+    }
+  },
+  directives: {
+    focus: {
+      inserted (el, binding) {
+        // el.focus()
+        console.log(el)
+        console.log(el.children[0])
+        console.log(binding)
+        el.children[0].focus()
+      }
     }
   },
   mounted () {
