@@ -48,10 +48,25 @@
                   label    指定选项标签为选项对象的某个属性值
                   children 指定选项的子选项为选项对象的某个属性值
               -->
-              <el-cascader :options="cateList" :props="cateprops" clearable></el-cascader>
+              <el-cascader :options="cateList" :props="cateprops" clearable @change="getcatid"></el-cascader>
             </el-form-item>
           </el-tab-pane>
-          <el-tab-pane label="上传图片" name="1">上传图片</el-tab-pane>
+          <el-tab-pane label="上传图片" name="1">
+            <el-upload
+              class="upload-demo"
+              action="http://localhost:8888/api/private/v1/upload"
+              :headers="getToken()"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :on-success="handleSuccess"
+              :before-upload="bu"
+              :file-list="fileList"
+              list-type="picture"
+            >
+              <el-button size="small" type="primary">点击上传</el-button>
+              <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            </el-upload>
+          </el-tab-pane>
           <el-tab-pane label="商品描述" name="2">商品描述</el-tab-pane>
           <el-tab-pane label="定时任务补偿" name="3">定时任务补偿</el-tab-pane>
         </el-tabs>
@@ -85,6 +100,56 @@ export default {
         value: 'cat_id',
         label: 'cat_name',
         children: 'children'
+      },
+      fileList: []
+    }
+  },
+  methods: {
+    // 获取当前级联选择器的value
+    getcatid (value) {
+      // console.log(value.join(','))
+      this.goodsForm.goods_cat = value.join(',')
+      console.log(this.goodsForm.goods_cat)
+    },
+    // 设置请求头传递token
+    getToken () {
+      var token = localStorage.getItem('itcast_manager')
+      return { Authorization: token }
+    },
+    // 上传成功之后的处理函数
+    handleSuccess (response, file, fileList) {
+      console.log(response, file, fileList)
+      // 数据就存储在reponse中
+      this.goodsForm.pics.push({ pic: response.data.tmp_path })
+      console.log(this.goodsForm.pics)
+    },
+    // 预览
+    handlePreview () {},
+    // 移除
+    handleRemove (file, fileList) {
+      console.log(file)
+      if (!file.response) {
+        return
+      }
+      // file就是当前你移除的文件
+      var filename = file.response.data.tmp_path
+      // 我们要根据 file里面的数据删除this.goodsForm.pics中的数据
+      for (var i = 0; i < this.goodsForm.pics.length; i++) {
+        if (this.goodsForm.pics[i].pic === filename) {
+          this.goodsForm.pics.splice(i, 1)
+          break
+        }
+      }
+    },
+    bu (file) {
+      console.log(file)
+      if (file.type.indexOf('image/') !== 0) {
+        this.$message({
+          type: 'warning',
+          message: '请选择图片格式的文件'
+        })
+        // return false会触发handleRemove操作
+        return false
       }
     }
   },
