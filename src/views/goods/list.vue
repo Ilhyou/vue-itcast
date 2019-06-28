@@ -28,7 +28,10 @@
         <el-table-column prop="add_time" label="创建时间"></el-table-column>
         <el-table-column label="操作">
           <template slot-scope="scope">
-            <el-button size="mini">编辑</el-button>
+            <el-button
+              size="mini"
+              @click="$router.push({name:'Add',query:{id:`${scope.row.goods_id}`}})"
+            >编辑</el-button>
             <el-button size="mini" type="danger">删除</el-button>
           </template>
         </el-table-column>

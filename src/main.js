@@ -1,12 +1,17 @@
 import Vue from 'vue'
 import App from './App.vue'
+import VueQuillEditor from 'vue-quill-editor'
 // 引入路由模块
 import router from '@/router.js'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.less'
-Vue.use(ElementUI)
 
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+Vue.use(ElementUI)
+Vue.use(VueQuillEditor)
 Vue.config.productionTip = false
 
 // 凡是路由请求都会经过这个前置导航守卫---中间件
@@ -33,6 +38,7 @@ router.beforeEach((to, from, next) => {
     })
   }
 })
+
 new Vue({
   render: h => h(App),
   router

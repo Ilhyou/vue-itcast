@@ -4,7 +4,7 @@
     <el-breadcrumb separator="/">
       <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
       <el-breadcrumb-item>商品管理</el-breadcrumb-item>
-      <el-breadcrumb-item>商品列表</el-breadcrumb-item>
+      <el-breadcrumb-item>{{br_type}}</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card class="box-card">
       <!-- 步骤条 -->
@@ -48,7 +48,13 @@
                   label    指定选项标签为选项对象的某个属性值
                   children 指定选项的子选项为选项对象的某个属性值
               -->
-              <el-cascader :options="cateList" :props="cateprops" clearable @change="getcatid"></el-cascader>
+              <el-cascader
+                v-model="goodsForm.goods_cat"
+                :options="cateList"
+                :props="cateprops"
+                clearable
+                @change="getcatid"
+              ></el-cascader>
             </el-form-item>
           </el-tab-pane>
           <el-tab-pane label="上传图片" name="1">
@@ -67,19 +73,31 @@
               <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
             </el-upload>
           </el-tab-pane>
-          <el-tab-pane label="商品描述" name="2">商品描述</el-tab-pane>
+          <el-tab-pane label="商品描述" name="2">
+            <quill-editor
+              v-model="goodsForm.goods_introduce"
+              ref="myQuillEditor"
+              :options="editorOption"
+              style="height:300px;border-bottom:1px solid #ccc;"
+            ></quill-editor>
+          </el-tab-pane>
           <el-tab-pane label="定时任务补偿" name="3">定时任务补偿</el-tab-pane>
         </el-tabs>
-        <el-button type="success">添加商品</el-button>
+        <el-button type="success" @click="addGoods">添加商品</el-button>
       </el-form>
     </el-card>
   </div>
 </template>
 <script>
 import { getCategoriesList } from '@/api/category.js'
+import { addGoodsInfo, getGoodsById } from '@/api/goods.js'
 export default {
   data () {
     return {
+      // 面包屑文字
+      br_type: '添加商品',
+      // 富文本的配置，主要用来配置样式按钮
+      editorOption: {},
       // 标签页当前被激活的内容面板
       activeName: '0',
       // 基本参数数据
@@ -151,9 +169,31 @@ export default {
         // return false会触发handleRemove操作
         return false
       }
+    },
+    // 添加商品信息
+    addGoods () {
+      console.log(this.goodsForm)
+      addGoodsInfo(this.goodsForm)
+        .then(res => {
+          console.log(res)
+          if (res.data.meta.status === 201) {
+            this.$message({
+              type: 'success',
+              message: res.data.meta.msg
+            })
+            this.$router.push({ name: 'List' })
+          }
+        })
+        .catch(err => {
+          console.log(err)
+        })
     }
   },
   mounted () {
+    console.log(this.$route.query.id)
+    if (this.$route.query.id) {
+      this.br_type = '编辑商品'
+    }
     getCategoriesList([3])
       .then(res => {
         console.log(res)
@@ -177,6 +217,28 @@ export default {
           message: 'error'
         })
       })
+    getGoodsById(this.$route.query.id).then(res => {
+      console.log(res)
+      if (res.data.meta.status === 200) {
+        this.goodsForm.goods_price = res.data.data.goods_price
+        this.goodsForm.goods_number = res.data.data.goods_number
+        this.goodsForm.goods_weight = res.data.data.goods_weight
+        this.goodsForm.goods_introduce = res.data.data.goods_introduce
+        this.goodsForm.goods_name = res.data.data.goods_name
+        this.goodsForm.goods_cat = res.data.data.goods_cat.split(',').map(v => {
+          return v - 0
+        })
+        this.goodsForm.pics = res.data.data.pics
+        this.fileList = this.goodsForm.pics.map(v => {
+          return {
+            goods_id: v.goods_id,
+            url: v.pics_mid_url
+          }
+        })
+        this.goodsForm.atts = res.data.data.atts
+        console.log(this.fileList)
+      }
+    })
   }
 }
 </script>
