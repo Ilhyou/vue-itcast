@@ -27,7 +27,7 @@
                 closable
                 type="success"
                 style="margin-bottom:15px;"
-                @close="removeRight(scope.row,first.id)"
+                @close="ctn=0;removeRight(scope.row,first.id)"
               >{{first.authName}}</el-tag>
             </el-col>
             <el-col :span="20">
@@ -36,7 +36,7 @@
                   <el-tag
                     closable
                     type="info"
-                    @close="removeRight(scope.row,second.id)"
+                    @close="ctn=0;removeRight(scope.row,second.id)"
                   >{{second.authName}}</el-tag>
                 </el-col>
                 <el-col :span="20">
@@ -46,7 +46,7 @@
                     v-for="third in second.children"
                     :key="third.id"
                     style="margin-bottom:15px;margin-right:5px;"
-                    @close="removeRight(scope.row,third.id)"
+                    @close="ctn=0;removeRight(scope.row,third.id)"
                   >{{third.authName}}</el-tag>
                 </el-col>
               </el-row>
@@ -154,6 +154,8 @@ import { getAllRightList } from '@/api/right.js'
 export default {
   data () {
     return {
+      // 当值为0的时候弹出提示信息 当我们删权限的时候 用递归出现很多提示框，所以用此判断一下
+      ctn: 0,
       // 角色列表数据
       rolesList: [],
       // 控制新增角色对话框的显示与隐藏
@@ -236,46 +238,29 @@ export default {
         .then(res => {
           if (res.data.meta.status === 200) {
             console.log(res)
-            this.$message({
-              message: res.data.meta.msg,
-              type: 'success'
+            if (this.ctn === 0) {
+              this.$message({
+                message: res.data.meta.msg,
+                type: 'success'
+              })
+              this.ctn++
+            }
+            // 当删除完这个权限之后 应该判断这个权限还有没有兄弟权限 就应该删除上一级权限
+            // 我们需要对返回的数据（删除之后这个角色还拥有的权限）进行重新的遍历，判断某个权限是否还有子级权限 如果有 则不处理 如果没有 则也要删除没有人格自己权限的权限
+
+            var data = res.data.data
+            data.forEach((v1, i1) => {
+              if (v1.children.length === 0) {
+                this.removeRight(row, v1.id)
+              } else {
+                v1.children.forEach((v2, i2) => {
+                  if (v2.children.length === 0) {
+                    this.removeRight(row, v2.id)
+                  }
+                })
+              }
             })
             row.children = res.data.data
-            if (row.children.length > 0) {
-              row.children.forEach((first, index) => {
-                if (first.children.length > 0) {
-                  console.log(1)
-                  first.children.forEach((second, index) => {
-                    if (second.children.length === 0) {
-                      removeRightByRid(row.id, second.id).then(res => {
-                        if (res.data.meta.status === 200) {
-                          row.children = res.data.data
-                          console.log(row.children)
-                          row.children.forEach((third, index) => {
-                            console.log(third)
-                            if (third.children.length === 0) {
-                              removeRightByRid(row.id, third.id).then(res => {
-                                if (res.data.meta.status === 200) {
-                                  console.log(res.data.data)
-                                  row.children = res.data.data
-                                }
-                              })
-                            }
-                          })
-                        }
-                      })
-                    }
-                  })
-                } else {
-                  removeRightByRid(row.id, first.id).then(res => {
-                    if (res.data.meta.status === 200) {
-                      console.log(res.data.data)
-                      row.children = res.data.data
-                    }
-                  })
-                }
-              })
-            }
           } else {
             this.$message({
               message: res.data.meta.msg,
